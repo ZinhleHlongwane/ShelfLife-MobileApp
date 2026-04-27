@@ -1,6 +1,6 @@
 import type { FoodStatus } from "./inventoryLogic";
 
-// Converts status into text for the user.
+// Converts internal status into text the user understands.
 export const getStatusLabel = (status: FoodStatus): string => {
   if (status === "expired") return "Expired";
   if (status === "expiringSoon") return "Expiring Soon";
@@ -8,7 +8,7 @@ export const getStatusLabel = (status: FoodStatus): string => {
   return "Fresh";
 };
 
-// Converts status into a color for the card.
+// Converts internal status into a card color.
 export const getStatusColor = (status: FoodStatus): string => {
   if (status === "expired") return "#e53935";
   if (status === "expiringSoon") return "#fb8c00";

@@ -8,12 +8,12 @@ export const getDaysUntilExpiry = (expiryDate: Date): number => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-// Checks if the item is already expired.
+// Returns true if the expiry date has already passed.
 export const isExpired = (expiryDate: Date): boolean => {
   return getDaysUntilExpiry(expiryDate) < 0;
 };
 
-// Checks if the item expires within 3 days.
+// Returns true if the item expires within 3 days but is not expired.
 export const isExpiringSoon = (expiryDate: Date): boolean => {
   const days = getDaysUntilExpiry(expiryDate);
 

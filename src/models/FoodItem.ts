@@ -3,5 +3,7 @@ export interface FoodItem {
   id: string;
   name: string;
   quantity: number;
+
+  // Used to calculate freshness status
   expiryDate: Date;
 }
