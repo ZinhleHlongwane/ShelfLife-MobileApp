@@ -6,4 +6,7 @@ export interface FoodItem {
 
   // Used to calculate freshness status
   expiryDate: Date;
+
+  // Used to organize items by storage area
+  category: "fridge" | "pantry" | "freezer";
 }
