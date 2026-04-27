@@ -3,37 +3,43 @@ import { View, Text, TextInput, Button, ScrollView } from "react-native";
 import { FoodCard } from "../components/FoodCard";
 import type { FoodItem } from "../models/FoodItem";
 
+// Define allowed categories
+type Category = "fridge" | "pantry" | "freezer";
+
 export const InventoryScreen = () => {
-  // State: holds all food items
+  // State: stores all items
   const [items, setItems] = useState<FoodItem[]>([]);
 
   // State: form inputs
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
+  const [category, setCategory] = useState<Category>("fridge");
 
-  // Adds a new item to the inventory
+  // Adds a new item to inventory
   const addItem = () => {
     // Basic validation
     if (!name || !quantity || !expiryDate) return;
 
     const newItem: FoodItem = {
-      id: Date.now().toString(), // simple unique ID
+      id: Date.now().toString(), // unique ID
       name,
-      quantity: Number(quantity), // convert string → number
-      expiryDate: new Date(expiryDate), // convert string → Date
+      quantity: Number(quantity), // string → number
+      expiryDate: new Date(expiryDate), // string → Date
+      category,
     };
 
     // Add item to list
     setItems((prev) => [...prev, newItem]);
 
-    // Reset inputs
+    // Reset form inputs
     setName("");
     setQuantity("");
     setExpiryDate("");
+    setCategory("fridge");
   };
 
-  // Removes an item by ID
+  // Deletes an item by ID
   const deleteItem = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
@@ -72,11 +78,23 @@ export const InventoryScreen = () => {
           style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
         />
 
-        {/* Add button */}
+        {/* Category selection buttons */}
+        <View style={{ flexDirection: "row", gap: 8, marginBottom: 10 }}>
+          <Button title="Fridge" onPress={() => setCategory("fridge")} />
+          <Button title="Pantry" onPress={() => setCategory("pantry")} />
+          <Button title="Freezer" onPress={() => setCategory("freezer")} />
+        </View>
+
+        {/* Show selected category */}
+        <Text style={{ marginBottom: 10 }}>
+          Selected: {category}
+        </Text>
+
+        {/* Add item button */}
         <Button title="Add Item" onPress={addItem} />
       </View>
 
-      {/* Render list of items */}
+      {/* Render all items */}
       {items.map((item) => (
         <FoodCard key={item.id} item={item} onDelete={deleteItem} />
       ))}

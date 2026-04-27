@@ -1,19 +1,21 @@
 import { Text, View, TouchableOpacity } from "react-native";
 import type { FoodItem } from "../models/FoodItem";
 
-// Logic + display helpers
+// Import logic to determine item status
 import { getFoodStatus } from "../features/inventory/inventoryLogic";
+
+// Import helpers to display status nicely
 import { getStatusColor, getStatusLabel } from "../features/inventory/inventoryDisplay";
 import { getDaysUntilExpiry } from "../utils/dateHelpers";
 
-// Props: what this component expects
+// Props: what this component receives
 type Props = {
   item: FoodItem;
   onDelete: (id: string) => void;
 };
 
 export const FoodCard = ({ item, onDelete }: Props) => {
-  // Determine item status (expired / expiringSoon / fresh)
+  // Determine the item's status (expired / expiringSoon / fresh)
   const status = getFoodStatus(item);
 
   // Convert status into UI values
@@ -31,7 +33,7 @@ export const FoodCard = ({ item, onDelete }: Props) => {
         borderRadius: 12,
         marginBottom: 10,
 
-        // Left border visually shows status (red/orange/green)
+        // Visual indicator of status (red/orange/green line)
         borderLeftWidth: 6,
         borderLeftColor: statusColor,
       }}
@@ -46,7 +48,12 @@ export const FoodCard = ({ item, onDelete }: Props) => {
         Quantity: {item.quantity}
       </Text>
 
-      {/* Status label + days left */}
+      {/* Category */}
+      <Text>
+        Category: {item.category}
+      </Text>
+
+      {/* Status + days left */}
       <Text style={{ color: statusColor, fontWeight: "bold", marginTop: 6 }}>
         {statusLabel} • {daysLeft} day(s) left
       </Text>
