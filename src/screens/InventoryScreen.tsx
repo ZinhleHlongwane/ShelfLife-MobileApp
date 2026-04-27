@@ -1,42 +1,53 @@
 import { useState } from "react";
 import { View, Text, TextInput, Button, ScrollView } from "react-native";
 import { FoodCard } from "../components/FoodCard";
-import { FoodItem } from "../models/FoodItem";
+import type { FoodItem } from "../models/FoodItem";
 
 export const InventoryScreen = () => {
-  // Stores all food items
+  // State: holds all food items
   const [items, setItems] = useState<FoodItem[]>([]);
 
-  // Stores form input values
+  // State: form inputs
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
 
-  // Adds a new item to the list
+  // Adds a new item to the inventory
   const addItem = () => {
-    if (!name || !quantity) return;
+    // Basic validation
+    if (!name || !quantity || !expiryDate) return;
 
     const newItem: FoodItem = {
-      id: Date.now().toString(),
+      id: Date.now().toString(), // simple unique ID
       name,
-      quantity: Number(quantity),
+      quantity: Number(quantity), // convert string → number
+      expiryDate: new Date(expiryDate), // convert string → Date
     };
 
+    // Add item to list
     setItems((prev) => [...prev, newItem]);
 
+    // Reset inputs
     setName("");
     setQuantity("");
+    setExpiryDate("");
   };
 
-  // Deletes an item by id
+  // Removes an item by ID
   const deleteItem = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   return (
     <ScrollView style={{ padding: 20 }}>
-      <Text style={{ fontSize: 28, fontWeight: "bold" }}>ShelfLife</Text>
+      {/* App title */}
+      <Text style={{ fontSize: 28, fontWeight: "bold" }}>
+        ShelfLife
+      </Text>
 
+      {/* Form section */}
       <View style={{ marginVertical: 20 }}>
+        {/* Name input */}
         <TextInput
           placeholder="Food name"
           value={name}
@@ -44,6 +55,7 @@ export const InventoryScreen = () => {
           style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
         />
 
+        {/* Quantity input */}
         <TextInput
           placeholder="Quantity"
           value={quantity}
@@ -52,9 +64,19 @@ export const InventoryScreen = () => {
           style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
         />
 
+        {/* Expiry date input */}
+        <TextInput
+          placeholder="Expiry date e.g. 2026-04-30"
+          value={expiryDate}
+          onChangeText={setExpiryDate}
+          style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
+        />
+
+        {/* Add button */}
         <Button title="Add Item" onPress={addItem} />
       </View>
 
+      {/* Render list of items */}
       {items.map((item) => (
         <FoodCard key={item.id} item={item} onDelete={deleteItem} />
       ))}
