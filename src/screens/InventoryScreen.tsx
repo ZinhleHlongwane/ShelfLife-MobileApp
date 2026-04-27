@@ -1,3 +1,4 @@
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import { View, Text, TextInput, Button, ScrollView } from "react-native";
 import { FoodCard } from "../components/FoodCard";
@@ -15,6 +16,8 @@ export const InventoryScreen = () => {
   const [quantity, setQuantity] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const [category, setCategory] = useState<Category>("fridge");
+  const [showPicker, setShowPicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Adds a new item to inventory
   const addItem = () => {
@@ -25,7 +28,7 @@ export const InventoryScreen = () => {
       id: Date.now().toString(), // unique ID
       name,
       quantity: Number(quantity), // string → number
-      expiryDate: new Date(expiryDate), // string → Date
+      expiryDate: selectedDate, // string → Date
       category,
     };
 
@@ -70,13 +73,26 @@ export const InventoryScreen = () => {
           style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
         />
 
-        {/* Expiry date input */}
-        <TextInput
-          placeholder="Expiry date e.g. 2026-04-30"
-          value={expiryDate}
-          onChangeText={setExpiryDate}
-          style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
-        />
+        {/* Button to open date picker */}
+<Button title="Select Expiry Date" onPress={() => setShowPicker(true)} />
+
+{/* Show selected date */}
+<Text style={{ marginVertical: 10 }}>
+  Selected: {selectedDate.toDateString()}
+</Text>
+
+    {/* Date picker (only shows when triggered) */}
+    {showPicker && (
+    <DateTimePicker
+        value={selectedDate}
+        mode="date"
+        display="default"
+        onChange={(event, date) => {
+        setShowPicker(false);
+        if (date) setSelectedDate(date);
+        }}
+    />
+    )}
 
         {/* Category selection buttons */}
         <View style={{ flexDirection: "row", gap: 8, marginBottom: 10 }}>
