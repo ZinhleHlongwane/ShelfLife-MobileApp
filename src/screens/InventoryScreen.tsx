@@ -4,10 +4,14 @@ import { FoodCard } from "../components/FoodCard";
 import { FoodItem } from "../models/FoodItem";
 
 export const InventoryScreen = () => {
+  // Stores all food items
   const [items, setItems] = useState<FoodItem[]>([]);
+
+  // Stores form input values
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
 
+  // Adds a new item to the list
   const addItem = () => {
     if (!name || !quantity) return;
 
@@ -23,26 +27,21 @@ export const InventoryScreen = () => {
     setQuantity("");
   };
 
+  // Deletes an item by id
   const deleteItem = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   return (
     <ScrollView style={{ padding: 20 }}>
-      <Text style={{ fontSize: 28, fontWeight: "bold" }}>
-        ShelfLife
-      </Text>
+      <Text style={{ fontSize: 28, fontWeight: "bold" }}>ShelfLife</Text>
 
       <View style={{ marginVertical: 20 }}>
         <TextInput
           placeholder="Food name"
           value={name}
           onChangeText={setName}
-          style={{
-            borderWidth: 1,
-            padding: 10,
-            marginBottom: 10,
-          }}
+          style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
         />
 
         <TextInput
@@ -50,11 +49,7 @@ export const InventoryScreen = () => {
           value={quantity}
           onChangeText={setQuantity}
           keyboardType="numeric"
-          style={{
-            borderWidth: 1,
-            padding: 10,
-            marginBottom: 10,
-          }}
+          style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
         />
 
         <Button title="Add Item" onPress={addItem} />
