@@ -1,33 +1,94 @@
-<div align="center">
+# ShelfLife Mobile
 
-# 📱 ShelfLife Mobile
+**A React Native application for managing grocery inventory and reducing household food waste.**
 
-**A React Native food-inventory app that helps users see what they have and what needs to be used soon.**
+ShelfLife Mobile is the mobile client in the ShelfLife application suite. It shares inventory data with [ShelfLife Web](https://github.com/ZinhleHlongwane/ShelfLife-WebApp) through the [ShelfLife ASP.NET Core API](https://github.com/ZinhleHlongwane/ShelfLife-API).
 
-![React Native](https://img.shields.io/badge/React_Native-mobile-61DAFB?logo=react&logoColor=black)
-![Expo](https://img.shields.io/badge/Expo-app-000020?logo=expo&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+## Current features
 
-</div>
+- Load shared inventory from the ASP.NET Core API
+- Add food items with quantity, measurement unit, expiry date and storage category
+- Edit existing inventory records
+- Delete inventory records
+- Filter inventory by fridge, pantry and freezer
+- Display expiry status and days remaining
+- Show loading, empty, validation and API error states
+- Confirm destructive delete actions
 
-ShelfLife Mobile is the mobile companion to the ShelfLife web project.
+Changes made in the mobile app are persisted by the API and are available to the web client using the same backend.
 
-The app focuses on making food inventory easy to check from a phone, with expiry-date awareness built directly into the experience.
+## Architecture
 
-## What it currently does
+```mermaid
+flowchart TD
+    Mobile["ShelfLife Mobile<br/>Expo + React Native"] --> API["ShelfLife API<br/>ASP.NET Core"]
+    Web["ShelfLife Web<br/>React + TypeScript"] --> API
+    API --> DB[("PostgreSQL")]
+```
 
-The mobile project includes:
+## Technology
 
-- an inventory screen
-- reusable food cards
-- food-item models
-- inventory display logic
-- expiry-date calculations
-- date helper utilities
+| Area | Technology |
+|---|---|
+| Mobile framework | React Native 0.81 |
+| Development platform | Expo SDK 54 |
+| Language | TypeScript |
+| API communication | REST / Fetch API |
+| Backend | ASP.NET Core / .NET 10 |
+| Database | PostgreSQL |
 
-The goal is to keep the app simple enough to use quickly while still providing useful information about food freshness.
+## Run locally
 
-## How it is structured
+### Prerequisites
+
+- Node.js 22 or later
+- npm
+- Expo Go on a supported phone, or an Android/iOS simulator
+- The ShelfLife API running locally with its PostgreSQL database
+
+### Install and start
+
+```bash
+npm install
+npx expo start
+```
+
+### Configure the API address
+
+The mobile app reads `EXPO_PUBLIC_API_BASE_URL`. It defaults to `http://10.0.2.2:5000`, which is the host-machine address from the standard Android emulator.
+
+Set the environment variable to match the environment where the API is running:
+
+| Environment | Example API URL |
+|---|---|
+| Android emulator | `http://10.0.2.2:5000` |
+| iOS simulator | `http://localhost:5000` |
+| Physical phone using Expo Go | `http://YOUR_COMPUTER_LAN_IP:5000` |
+
+For a physical phone, the phone and computer must be on the same network. Use your computer's private LAN IPv4 address, not `localhost`. Keep the API bound to an interface reachable by the phone and allow the port through the computer firewall.
+
+Create a local `.env` file in the project root if you need to override the default:
+
+```env
+EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:5000
+```
+
+Start PostgreSQL and the API by following the setup instructions in the [ShelfLife API repository](https://github.com/ZinhleHlongwane/ShelfLife-API).
+
+## Inventory API
+
+The mobile client uses the shared endpoints:
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/inventory` | Load inventory |
+| POST | `/api/inventory` | Add an item |
+| PUT | `/api/inventory/{id}` | Update an item |
+| DELETE | `/api/inventory/{id}` | Delete an item |
+
+Expiry dates are sent as date-only `YYYY-MM-DD` values to avoid timezone shifts. Measurement units and storage categories use the API's enum values.
+
+## Project structure
 
 ```text
 src/
@@ -41,102 +102,34 @@ src/
 │   └── FoodItem.ts
 ├── screens/
 │   └── InventoryScreen.tsx
+├── services/
+│   └── inventoryApi.ts
 └── utils/
     └── dateHelpers.ts
 ```
 
-This keeps UI components, business logic and data models separate rather than putting everything inside one screen.
+## Current limitations
 
-## How expiry information works
+- Authentication and household-specific access are not implemented in the API yet.
+- Barcode scanning, recipe suggestions, shopping lists and push notifications remain planned.
+- Offline caching and conflict resolution are not implemented.
+- The mobile client has not yet been verified in a live device session.
 
-The application uses food expiry dates to determine how items should be presented to the user.
+Do not expose the development API publicly or use it for real household data until authentication, authorisation and production security controls are implemented.
 
-The idea is to make it easy to identify:
+## Roadmap
 
-```text
-Fresh items
-Items that should be used soon
-Expired items
-```
-
-As the project grows, that logic will become the basis for reminders and food-waste recommendations.
-
-## Run the app
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start Expo:
-
-```bash
-npx expo start
-```
-
-You can then run the project using an emulator or a supported mobile device.
-
-## Where ShelfLife is going
-
-The mobile app will eventually connect to the same backend as ShelfLife Web.
-
-```mermaid
-flowchart TD
-
-  M["ShelfLife Mobile"] --> API["Shared REST API"]
-  W["ShelfLife Web"] --> API
-
-  API --> DB[("PostgreSQL")]
-
-  API --> B["Barcode data"]
-  API --> R["Recipe data"]
-  API --> N["Notifications"]
-```
-
-That would allow a household to update its food inventory from either a browser or a phone.
-
-## Planned features
-
-- barcode scanning
-- shared household inventory
-- push notifications
-- expiry reminders
-- recipe suggestions
-- shopping-list generation
-- food-waste statistics
-- synchronisation with ShelfLife Web
-
-## Why I built it
-
-I wanted ShelfLife to be more than a desktop-style web application.
-
-Food inventory is something people often need while standing in the kitchen or shopping in a store, so a mobile version makes sense for the problem.
-
-Building both clients also gives me a chance to learn how multiple frontends can share the same backend and domain model.
-
-## Tech stack
-
-| Area | Technology |
-|---|---|
-| **Mobile framework** | React Native |
-| **Development platform** | Expo |
-| **Language** | TypeScript |
-| **Current focus** | Inventory and expiry tracking |
-| **Planned backend** | Shared REST API |
-
-## What's next
-
-- [ ] Connect the app to a real backend
-- [ ] Share inventory data with ShelfLife Web
+- [x] Connect mobile inventory listing to the shared API
+- [x] Add create, update and delete operations
+- [x] Add storage filters and expiry indicators
+- [ ] Add automated component and API-client tests
+- [ ] Add authentication and household accounts
+- [ ] Add offline-aware inventory synchronisation
 - [ ] Add barcode scanning
 - [ ] Add expiry notifications
-- [ ] Add food-entry forms
-- [ ] Add household accounts
-- [ ] Add recipe suggestions
-- [ ] Add automated tests
-- [ ] Add screenshots and a mobile demo
+- [ ] Add recipe suggestions and shopping lists
+- [ ] Add mobile screenshots and a verified device demo
 
 ---
 
-<p align="center">Built by <a href="https://github.com/ZinhleHlongwane">Zinhle Hlongwane</a> · Johannesburg 🇿🇦 · <a href="https://www.linkedin.com/in/zinhle-hlongwane-872354209">LinkedIn</a></p>
+Built by [Zinhle Hlongwane](https://github.com/ZinhleHlongwane) · Johannesburg, South Africa
