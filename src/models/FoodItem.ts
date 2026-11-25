@@ -1,12 +1,13 @@
-// This describes the shape of one food item in the app.
+import type { Unit } from "./Unit";
+
+export type StorageCategory = "fridge" | "pantry" | "freezer";
+
 export interface FoodItem {
   id: string;
   name: string;
   quantity: number;
-
-  // Used to calculate freshness status
-  expiryDate: Date;
-
-  // Used to organize items by storage area
-  category: "fridge" | "pantry" | "freezer";
+  unit: Unit;
+  // ISO calendar date (YYYY-MM-DD), not a timestamp.
+  expiryDate: string;
+  category: StorageCategory;
 }

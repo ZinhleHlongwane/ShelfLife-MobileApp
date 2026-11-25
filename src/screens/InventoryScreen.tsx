@@ -1,119 +1,115 @@
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
-import { View, Text, TextInput, Button, ScrollView } from "react-native";
+import { Alert, View, Text, TextInput, Button, ScrollView } from "react-native";
 import { FoodCard } from "../components/FoodCard";
-import type { FoodItem } from "../models/FoodItem";
-
-// Define allowed categories
-type Category = "fridge" | "pantry" | "freezer";
+import type { FoodItem, StorageCategory } from "../models/FoodItem";
+import { Unit, type Unit as UnitType } from "../models/Unit";
+import { isValidDateOnly } from "../utils/dateHelpers";
 
 export const InventoryScreen = () => {
-  // State: stores all items
   const [items, setItems] = useState<FoodItem[]>([]);
-
-  // State: form inputs
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [unit, setUnit] = useState<UnitType>(Unit.COUNT);
   const [expiryDate, setExpiryDate] = useState("");
-  const [category, setCategory] = useState<Category>("fridge");
-  const [showPicker, setShowPicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [category, setCategory] = useState<StorageCategory>("fridge");
 
-  // Adds a new item to inventory
   const addItem = () => {
-    // Basic validation
-    if (!name || !quantity || !expiryDate) return;
+    const trimmedName = name.trim();
+    const parsedQuantity = Number(quantity);
+
+    if (!trimmedName || !quantity.trim() || !Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
+      Alert.alert("Check your item", "Enter a food name and a quantity greater than zero.");
+      return;
+    }
+
+    if (!isValidDateOnly(expiryDate)) {
+      Alert.alert("Check the expiry date", "Enter a valid date in YYYY-MM-DD format.");
+      return;
+    }
 
     const newItem: FoodItem = {
-      id: Date.now().toString(), // unique ID
-      name,
-      quantity: Number(quantity), // string → number
-      expiryDate: selectedDate, // string → Date
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      name: trimmedName,
+      quantity: parsedQuantity,
+      unit,
+      expiryDate,
       category,
     };
 
-    // Add item to list
-    setItems((prev) => [...prev, newItem]);
-
-    // Reset form inputs
+    setItems((previous) => [...previous, newItem]);
     setName("");
     setQuantity("");
+    setUnit(Unit.COUNT);
     setExpiryDate("");
     setCategory("fridge");
   };
 
-  // Deletes an item by ID
   const deleteItem = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+    setItems((previous) => previous.filter((item) => item.id !== id));
   };
 
   return (
-    <ScrollView style={{ padding: 20 }}>
-      {/* App title */}
-      <Text style={{ fontSize: 28, fontWeight: "bold" }}>
-        ShelfLife
-      </Text>
+    <ScrollView contentContainerStyle={{ padding: 20 }}>
+      <Text style={{ fontSize: 28, fontWeight: "bold" }}>ShelfLife</Text>
+      <Text style={{ marginTop: 4 }}>Track food freshness and reduce waste.</Text>
 
-      {/* Form section */}
-      <View style={{ marginVertical: 20 }}>
-        {/* Name input */}
+      <View style={{ marginVertical: 20, gap: 10 }}>
+        <Text style={{ fontSize: 18, fontWeight: "600" }}>Add food item</Text>
         <TextInput
           placeholder="Food name"
           value={name}
           onChangeText={setName}
-          style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
+          accessibilityLabel="Food name"
+          style={{ borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 12 }}
         />
-
-        {/* Quantity input */}
         <TextInput
           placeholder="Quantity"
           value={quantity}
           onChangeText={setQuantity}
-          keyboardType="numeric"
-          style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
+          keyboardType="decimal-pad"
+          accessibilityLabel="Quantity"
+          style={{ borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 12 }}
         />
-
-        {/* Button to open date picker */}
-<Button title="Select Expiry Date" onPress={() => setShowPicker(true)} />
-
-{/* Show selected date */}
-<Text style={{ marginVertical: 10 }}>
-  Selected: {selectedDate.toDateString()}
-</Text>
-
-    {/* Date picker (only shows when triggered) */}
-    {showPicker && (
-    <DateTimePicker
-        value={selectedDate}
-        mode="date"
-        display="default"
-        onChange={(event, date) => {
-        setShowPicker(false);
-        if (date) setSelectedDate(date);
-        }}
-    />
-    )}
-
-        {/* Category selection buttons */}
-        <View style={{ flexDirection: "row", gap: 8, marginBottom: 10 }}>
-          <Button title="Fridge" onPress={() => setCategory("fridge")} />
-          <Button title="Pantry" onPress={() => setCategory("pantry")} />
-          <Button title="Freezer" onPress={() => setCategory("freezer")} />
+        <Text style={{ fontWeight: "600" }}>Measurement unit</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          {Object.values(Unit).map((option) => (
+            <Button
+              key={option}
+              title={unit === option ? `✓ ${option}` : option}
+              onPress={() => setUnit(option)}
+            />
+          ))}
         </View>
-
-        {/* Show selected category */}
-        <Text style={{ marginBottom: 10 }}>
-          Selected: {category}
-        </Text>
-
-        {/* Add item button */}
-        <Button title="Add Item" onPress={addItem} />
+        <TextInput
+          placeholder="Expiry date (YYYY-MM-DD)"
+          value={expiryDate}
+          onChangeText={setExpiryDate}
+          keyboardType="numbers-and-punctuation"
+          maxLength={10}
+          accessibilityLabel="Expiry date in YYYY-MM-DD format"
+          style={{ borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 12 }}
+        />
+        <Text style={{ fontWeight: "600" }}>Storage location</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          {(["fridge", "pantry", "freezer"] as const).map((option) => (
+            <Button
+              key={option}
+              title={category === option ? `✓ ${option}` : option}
+              onPress={() => setCategory(option)}
+            />
+          ))}
+        </View>
+        <Button title="Add item" onPress={addItem} />
       </View>
 
-      {/* Render all items */}
-      {items.map((item) => (
-        <FoodCard key={item.id} item={item} onDelete={deleteItem} />
-      ))}
+      <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 10 }}>Your inventory</Text>
+      {items.length === 0 ? (
+        <Text>Your inventory is empty. Add your first food item above.</Text>
+      ) : (
+        items.map((item) => (
+          <FoodCard key={item.id} item={item} onDelete={deleteItem} />
+        ))
+      )}
     </ScrollView>
   );
 };
